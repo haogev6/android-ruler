@@ -1,0 +1,7 @@
+<resources>
+    <declare-styleable name="RulerView">
+        <attr name="centimeter" format="boolean" />
+        <attr name="inch" format="boolean" />
+        <attr name="vertical" format="boolean" />
+    </declare-styleable>
+</resources>
