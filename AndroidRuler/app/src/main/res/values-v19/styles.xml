@@ -9,6 +9,7 @@
 		<item name="colorAccent">@color/colorAccent</item>
 		<item name="android:windowTranslucentNavigation">true</item>
 		<item name="android:windowTranslucentStatus">true</item>
+		<item name="android:windowFullscreen">true</item>
 	</style>
 
 </resources>
