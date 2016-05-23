@@ -11,6 +11,7 @@ import android.os.Parcelable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
@@ -38,7 +39,6 @@ public class RulerView extends View {
 	private int mTextColor = Color.BLACK;
 	private boolean mShowCentimeter = true;
 	private boolean mShowInch = true;
-	private boolean mOrientationVertical = true;
 	private float oneMillimeter = 1;
 	private float oneInch = 1;
 	private TextPaint mTextPaint;
@@ -46,6 +46,7 @@ public class RulerView extends View {
 	private Paint mLinePaint;
 	private float mTextHeight;
 	private float zeroShift = 0;
+	private int mRotateDegree = 0;
 
 	public RulerView(Context context) {
 		super(context);
@@ -62,12 +63,15 @@ public class RulerView extends View {
 		init(attrs, defStyle);
 	}
 
-	public boolean isOrientationVertical() {
-		return mOrientationVertical;
+	public int getRotateDegree() {
+		return mRotateDegree;
 	}
 
-	public void setOrientationVertical(boolean vertical) {
-		mOrientationVertical = vertical;
+	public void setRotateDegree(int rotateDegree) {
+		if (this.mRotateDegree == rotateDegree % 360) {
+			return;
+		}
+		this.mRotateDegree = rotateDegree % 360;
 		initUnitLength();
 		invalidate();
 	}
@@ -75,6 +79,7 @@ public class RulerView extends View {
 	@Override
 	protected void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
+		Log.i(TAG, newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? "landscape" : "portrait");
 	}
 
 	@Override
@@ -86,14 +91,14 @@ public class RulerView extends View {
 		SavedState savedState = (SavedState) state;
 		super.onRestoreInstanceState(savedState.getSuperState());
 
-		mOrientationVertical = savedState.orientationVertical;
+		this.mRotateDegree = savedState.rotateDegree;
 		invalidate();
 	}
 
 	@Override
 	protected Parcelable onSaveInstanceState() {
 		SavedState savedState = new SavedState(super.onSaveInstanceState());
-		savedState.orientationVertical = mOrientationVertical;
+		savedState.rotateDegree = this.mRotateDegree;
 		return savedState;
 	}
 
@@ -104,7 +109,7 @@ public class RulerView extends View {
 
 		mShowCentimeter = a.getBoolean(R.styleable.RulerView_centimeter, mShowCentimeter);
 		mShowInch = a.getBoolean(R.styleable.RulerView_inch, mShowInch);
-		mOrientationVertical = a.getBoolean(R.styleable.RulerView_vertical, mOrientationVertical);
+		mRotateDegree = a.getInt(R.styleable.RulerView_rotate_degree, mRotateDegree) % 360;
 
 		a.recycle();
 
@@ -122,6 +127,7 @@ public class RulerView extends View {
 		mLinePaint.setStrokeWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, displayMetrics));
 		mLinePaint.setColor(mTextColor);
 		mLinePaint.setStyle(Paint.Style.STROKE);
+		mLinePaint.setStrokeCap(Paint.Cap.BUTT);
 
 		initUnitLength();
 	}
@@ -130,10 +136,10 @@ public class RulerView extends View {
 		final Configuration configuration = getResources().getConfiguration();
 		final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
 		if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-			oneInch = mOrientationVertical ? displayMetrics.ydpi
+			oneInch = mRotateDegree % 180 == 0 ? displayMetrics.ydpi
 					: TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_IN, 1, displayMetrics);
 		} else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			oneInch = mOrientationVertical ? TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_IN, 1, displayMetrics)
+			oneInch = mRotateDegree % 180 == 0 ? TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_IN, 1, displayMetrics)
 					: displayMetrics.ydpi;
 		}
 		oneMillimeter = oneInch * (1.0f / 25.4f);
@@ -174,13 +180,11 @@ public class RulerView extends View {
 		int contentWidth = getWidth() - paddingLeft - paddingRight;
 		int contentHeight = getHeight() - paddingTop - paddingBottom;
 
-		int contentLength = contentHeight;
-		int saveCount = 0;
-		if (mOrientationVertical) {
-			saveCount = canvas.save();
-			canvas.rotate(90, getWidth() / 2, getWidth() / 2);
-		} else {
-			contentLength = contentWidth;
+		int contentLength = mRotateDegree % 180 == 90 ? contentHeight : contentWidth;
+		int saveCount = canvas.save();
+		canvas.rotate(mRotateDegree, (float) getWidth() / 2, (float) getHeight() / 2);
+		if (mRotateDegree % 180 == 90) {
+			canvas.translate((float) (contentWidth - contentHeight) / 2, (float) (contentHeight - contentWidth) / 2);
 		}
 
 		int scale = 0;
@@ -203,9 +207,7 @@ public class RulerView extends View {
 			scaleShiftLength = oneMillimeter * scale;
 		}
 
-		if (mOrientationVertical) {
-			canvas.restoreToCount(saveCount);
-		}
+		canvas.restoreToCount(saveCount);
 	}
 
 	public static class SavedState extends BaseSavedState {
@@ -219,7 +221,7 @@ public class RulerView extends View {
 				return new SavedState[size];
 			}
 		};
-		public boolean orientationVertical;
+		public int rotateDegree;
 
 		public SavedState(Parcelable superState) {
 			super(superState);
@@ -227,18 +229,18 @@ public class RulerView extends View {
 
 		private SavedState(Parcel in) {
 			super(in);
-			orientationVertical = (in.readInt() != 0);
+			rotateDegree = in.readInt();
 		}
 
 		@Override
 		public void writeToParcel(Parcel out, int flags) {
 			super.writeToParcel(out, flags);
-			out.writeInt(orientationVertical ? 1 : 0);
+			out.writeInt(rotateDegree);
 		}
 
 		@Override
 		public String toString() {
-			return "RulerView.SavedState{orientationVertical" + orientationVertical + "}";
+			return "RulerView.SavedState{mRotateDegree" + rotateDegree + "}";
 		}
 	}
 }
