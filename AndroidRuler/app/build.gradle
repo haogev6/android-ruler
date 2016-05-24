@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'cn.bit.hao.android.ruler'
+            keyPassword 'cn.bit.hao.android.ruler'
+            storeFile file('keystore.jks')
+            storePassword 'cn.bit.hao.android.ruler'
+        }
+    }
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
     defaultConfig {
@@ -12,8 +20,12 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+        debug {
+            signingConfig signingConfigs.config
         }
     }
     productFlavors {

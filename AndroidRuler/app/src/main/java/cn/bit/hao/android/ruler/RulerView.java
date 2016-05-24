@@ -15,8 +15,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
-import cn.bit.hao.android.R;
-
 /**
  * @author wuhao at 2016/5/20
  */

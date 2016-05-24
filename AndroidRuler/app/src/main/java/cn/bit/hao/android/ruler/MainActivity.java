@@ -5,8 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 
-import cn.bit.hao.android.R;
-
 public class MainActivity extends AppCompatActivity {
 
 	private RulerView rulerView;
