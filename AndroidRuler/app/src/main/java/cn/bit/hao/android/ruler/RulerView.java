@@ -134,10 +134,10 @@ public class RulerView extends View {
 		final Configuration configuration = getResources().getConfiguration();
 		final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
 		if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-			oneInch = mRotateDegree % 180 == 0 ? displayMetrics.ydpi
+			oneInch = mRotateDegree % 180 == 90 ? displayMetrics.ydpi
 					: TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_IN, 1, displayMetrics);
 		} else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-			oneInch = mRotateDegree % 180 == 0 ? TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_IN, 1, displayMetrics)
+			oneInch = mRotateDegree % 180 == 90 ? TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_IN, 1, displayMetrics)
 					: displayMetrics.ydpi;
 		}
 		oneMillimeter = oneInch * (1.0f / 25.4f);
