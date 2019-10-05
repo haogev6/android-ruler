@@ -9,12 +9,12 @@ android {
             storePassword 'cn.bit.hao.android.ruler'
         }
     }
-    compileSdkVersion 25
-    buildToolsVersion '26.0.1'
+    compileSdkVersion 26
+    buildToolsVersion '26.0.3'
     defaultConfig {
         applicationId 'cn.bit.hao.android.ruler'
         minSdkVersion 15
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName '0.0.1'
     }
@@ -33,7 +33,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25+'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.12'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
 }
